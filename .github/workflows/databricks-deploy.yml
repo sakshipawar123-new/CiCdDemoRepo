@@ -1,0 +1,35 @@
+name: Deploy to Databricks
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Databricks CLI
+        run: |
+          pip install databricks-cli
+
+      - name: Set Databricks Credentials
+        run: |
+          echo "DATABRICKS_HOST=${{ secrets.DATABRICKS_HOST }}" >> $GITHUB_ENV
+          echo "DATABRICKS_TOKEN=${{ secrets.DATABRICKS_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Upload Bronze
+        run: |
+          databricks workspace import_dir bronze /Shared/DemoRepo/bronze --overwrite
+
+      - name: Upload Silver
+        run: |
+          databricks workspace import_dir silver /Shared/DemoRepo/silver --overwrite
+
+      - name: Upload Gold
+        run: |
+          databricks workspace import_dir gold /Shared/DemoRepo/gold --overwrite
